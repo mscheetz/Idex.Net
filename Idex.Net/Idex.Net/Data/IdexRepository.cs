@@ -15,9 +15,16 @@ namespace Idex.Net.Data
         private string baseUrl;
         private IRESTRepository _restRepo;
         private DateTimeHelper _dtHelper;
+        private string privateKey;
 
         public IdexRepository()
         {
+            LoadRepository();
+        }
+
+        public IdexRepository(string privateKey)
+        {
+            this.privateKey = privateKey;
             LoadRepository();
         }
 
