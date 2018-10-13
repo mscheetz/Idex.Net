@@ -40,13 +40,13 @@ namespace Idex.Net.Data
             return ExhangeTickerToTicker(response);
         }
 
-        public async Task<Dictionary<string, Ticker[]>> GetTickers()
+        public async Task<Dictionary<string, Ticker>> GetTickers()
         {
             string url = baseUrl + "/returnTicker";
 
-            var response = await _restRepo.PostApi<Dictionary<string, Ticker[]>>(url);
+            var response = await _restRepo.PostApi<Dictionary<string, ExchangeTicker>>(url);
 
-            return response;
+            return ExchangeTickerArrToTickerArr(response);
         }
 
         public async Task<OrderBook> GetOrderBook(string pair)
@@ -274,6 +274,18 @@ namespace Idex.Net.Data
             var response = await _restRepo.PostApi<OrderResponse, Dictionary<string, object>>(url, parameters);
 
             return response;
+        }
+
+        private Dictionary<string, Ticker> ExchangeTickerArrToTickerArr(Dictionary<string, ExchangeTicker> exchangeTickers)
+        {
+            var tickers = new Dictionary<string, Ticker>();
+
+            foreach(var item in exchangeTickers)
+            {
+                tickers.Add(item.Key, ExhangeTickerToTicker(item.Value));
+            }
+
+            return tickers;
         }
 
         private Ticker ExhangeTickerToTicker(ExchangeTicker exTicker)

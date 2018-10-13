@@ -10,6 +10,6 @@ namespace Idex.Net.Data.Interface
     {
         Task<Ticker> GetTicker(string pair);
 
-        Task<Dictionary<string, Ticker[]>> GetTickers();
+        Task<Dictionary<string, Ticker>> GetTickers();
     }
 }
