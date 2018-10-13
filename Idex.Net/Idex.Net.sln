@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Idex.Net", "Idex.Net\Idex.Net.csproj", "{0AF5BB55-0A77-4119-825A-67030FA57712}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Idex.Net.Tests", "Idex.Net.Tests\Idex.Net.Tests.csproj", "{A3588B7C-024F-4AEA-9DBE-16806EC0503E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0AF5BB55-0A77-4119-825A-67030FA57712}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AF5BB55-0A77-4119-825A-67030FA57712}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AF5BB55-0A77-4119-825A-67030FA57712}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AF5BB55-0A77-4119-825A-67030FA57712}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3588B7C-024F-4AEA-9DBE-16806EC0503E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3588B7C-024F-4AEA-9DBE-16806EC0503E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3588B7C-024F-4AEA-9DBE-16806EC0503E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3588B7C-024F-4AEA-9DBE-16806EC0503E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1DE5B4D3-9FF0-48AA-8575-EEF86D8E95A1}
+	EndGlobalSection
+EndGlobal
