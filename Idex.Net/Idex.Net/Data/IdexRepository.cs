@@ -16,6 +16,7 @@ namespace Idex.Net.Data
         private IRESTRepository _restRepo;
         private DateTimeHelper _dtHelper;
         private string privateKey;
+        private Dictionary<string, Currency> currencyList;
 
         public IdexRepository()
         {
@@ -33,7 +34,10 @@ namespace Idex.Net.Data
             _restRepo = new RESTRepository();
             baseUrl = "https://api.idex.market";
             _dtHelper = new DateTimeHelper();
+            currencyList = this.GetCurrencies().Result;
         }
+
+        #region Public Endpoints
 
         /// <summary>
         /// Get ticker for a trading pair
@@ -49,7 +53,7 @@ namespace Idex.Net.Data
 
             var response = await _restRepo.PostApi<ExchangeTicker, Dictionary<string, object>>(url, parameters);
 
-            return ExhangeTickerToTicker(response);
+            return Helpers.ExhangeTickerToTicker(response);
         }
 
         /// <summary>
@@ -62,7 +66,7 @@ namespace Idex.Net.Data
 
             var response = await _restRepo.PostApi<Dictionary<string, ExchangeTicker>>(url);
 
-            return ExchangeTickerArrToTickerArr(response);
+            return Helpers.ExchangeTickerArrToTickerArr(response);
         }
 
         /// <summary>
@@ -522,7 +526,11 @@ namespace Idex.Net.Data
             return response["address"];
         }
 
-        public async Task<OrderResponse> PlaceOrder(string pair, decimal price, decimal quantity)
+        #endregion Public Endpoints
+
+        #region Authenticated Endpoints
+
+        public async Task<OrderResponse> PlaceOrder(string pair, decimal price, decimal quantity, TradeType type)
         {
             string url = baseUrl + "/returnCurrencies";
 
@@ -548,33 +556,6 @@ namespace Idex.Net.Data
             return response;
         }
 
-        private Dictionary<string, Ticker> ExchangeTickerArrToTickerArr(Dictionary<string, ExchangeTicker> exchangeTickers)
-        {
-            var tickers = new Dictionary<string, Ticker>();
-
-            foreach(var item in exchangeTickers)
-            {
-                tickers.Add(item.Key, ExhangeTickerToTicker(item.Value));
-            }
-
-            return tickers;
-        }
-
-        private Ticker ExhangeTickerToTicker(ExchangeTicker exTicker)
-        {
-            var ticker = new Ticker
-            {
-                baseVolume = !exTicker.baseVolume.Equals("N/A") ? decimal.Parse(exTicker.baseVolume) : 0.0M,
-                high = !exTicker.high.Equals("N/A") ? decimal.Parse(exTicker.high) : 0.0M,
-                highestBid = !exTicker.highestBid.Equals("N/A") ? decimal.Parse(exTicker.highestBid) : 0.0M,
-                last = !exTicker.last.Equals("N/A") ? decimal.Parse(exTicker.last) : 0.0M,
-                low = !exTicker.low.Equals("N/A") ? decimal.Parse(exTicker.low) : 0.0M,
-                lowestAsk = !exTicker.lowestAsk.Equals("N/A") ? decimal.Parse(exTicker.lowestAsk) : 0.0M,
-                percentChange = !exTicker.percentChange.Equals("N/A") ? decimal.Parse(exTicker.percentChange) : 0.0M,
-                quoteVolume = !exTicker.quoteVolume.Equals("N/A") ? decimal.Parse(exTicker.quoteVolume) : 0.0M,
-            };
-
-            return ticker;
-        }
+        #endregion Authenticated Endpoints
     }
 }
