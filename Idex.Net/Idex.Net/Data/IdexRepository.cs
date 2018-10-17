@@ -35,6 +35,11 @@ namespace Idex.Net.Data
             _dtHelper = new DateTimeHelper();
         }
 
+        /// <summary>
+        /// Get ticker for a trading pair
+        /// </summary>
+        /// <param name="pair">Trading pair</param>
+        /// <returns>Ticker for selected pair</returns>
         public async Task<Ticker> GetTicker(string pair)
         {
             string url = baseUrl + "/returnTicker";
@@ -47,6 +52,10 @@ namespace Idex.Net.Data
             return ExhangeTickerToTicker(response);
         }
 
+        /// <summary>
+        /// Get ticker for all trading pairs
+        /// </summary>
+        /// <returns>Collection of tickers</returns>
         public async Task<Dictionary<string, Ticker>> GetTickers()
         {
             string url = baseUrl + "/returnTicker";
@@ -56,16 +65,33 @@ namespace Idex.Net.Data
             return ExchangeTickerArrToTickerArr(response);
         }
 
+        /// <summary>
+        /// Returns lowest and highest priced open orders for a given market.
+        /// </summary>
+        /// <param name="pair">Trading pair</param>
+        /// <returns>Collection of orders</returns>
         public async Task<OrderBook> GetOrderBook(string pair)
         {
             return await OnGetOrderBook(pair, null);
         }
 
+        /// <summary>
+        /// Returns the best-priced open orders for a given market.
+        /// </summary>
+        /// <param name="pair">Trading pair</param>
+        /// <param name="count">Number of records to return</param>
+        /// <returns>Collection of orders</returns>
         public async Task<OrderBook> GetOrderBook(string pair, int count)
         {
             return await OnGetOrderBook(pair, count);
         }
 
+        /// <summary>
+        /// Returns the best-priced open orders for a given market.
+        /// </summary>
+        /// <param name="pair">Trading pair</param>
+        /// <param name="count">Number of records to return</param>
+        /// <returns>Collection of orders</returns>
         private async Task<OrderBook> OnGetOrderBook(string pair, int? count)
         {
             string url = baseUrl + "/returnOrderBook";
@@ -84,26 +110,36 @@ namespace Idex.Net.Data
             return response;
         }
 
-        public async Task<OpenOrder[]> GetOpenOrders(string pair)
-        {
-            return await OnGetOpenOrders(pair, string.Empty, null, string.Empty);
-        }
-
-        public async Task<OpenOrder[]> GetOpenOrders(string pair, int count)
+        /// <summary>
+        /// Returns a list of all open orders
+        /// </summary>
+        /// <param name="pair">Trading pair</param>
+        /// <param name="count">Number to be returned (default = 100)</param>
+        /// <returns>Collection of open orders</returns>
+        public async Task<OpenOrder[]> GetOpenOrders(string pair, int count = 100)
         {
             return await OnGetOpenOrders(pair, string.Empty, count, string.Empty);
         }
 
-        public async Task<OpenOrder[]> GetAddressOpenOrders(string address)
-        {
-            return await OnGetOpenOrders(string.Empty, address, null, string.Empty);
-        }
-
-        public async Task<OpenOrder[]> GetAddressOpenOrdersFor(string address, int count)
+        /// <summary>
+        /// Returns a list of all open orders
+        /// </summary>
+        /// <param name="address">Address to query</param>
+        /// <param name="count">Number to be returned (default = 100)</param>
+        /// <returns>Collection of open orders</returns>
+        public async Task<OpenOrder[]> GetAddressOpenOrders(string address, int count = 100)
         {
             return await OnGetOpenOrders(string.Empty, address, count, string.Empty);
         }
 
+        /// <summary>
+        /// Returns a list of all open orders
+        /// </summary>
+        /// <param name="pair">Trading pair</param>
+        /// <param name="address">Address to query</param>
+        /// <param name="count">Number to be returned (default = 100)</param>
+        /// <param name="cursor">Page number to return</param>
+        /// <returns>Collection of open orders</returns>
         private async Task<OpenOrder[]> OnGetOpenOrders(string pair, string address, int? count, string cursor)
         {
             if(string.IsNullOrEmpty(pair) && string.IsNullOrEmpty(address))
@@ -133,17 +169,38 @@ namespace Idex.Net.Data
             return response;
         }
 
-        public async Task<TradeDetail[]> GetTradeHistory(string pair)
+        /// <summary>
+        /// Returns a list of all trades for a given market or address
+        /// </summary>
+        /// <param name="pair">Trading pair</param>
+        /// <param name="count">Number to be returned (default = 100)</param>
+        /// <returns>Collection of trade detail</returns>
+        public async Task<TradeDetail[]> GetTradeHistory(string pair, int count = 100)
         {
-            return await OnGetTradeHistory(pair, string.Empty, null, null, null, null, string.Empty);
+            return await OnGetTradeHistory(pair, string.Empty, null, null, null, count, string.Empty);
         }
 
-        public async Task<TradeDetail[]> GetTradeHistory(string pair, Sorting sort)
+        /// <summary>
+        /// Returns a list of all trades for a given market or address
+        /// </summary>
+        /// <param name="pair">Trading pair</param>
+        /// <param name="sort">Sorting by transaction date</param>
+        /// <param name="count">Number to be returned (default = 100)</param>
+        /// <returns>Collection of trade detail</returns>
+        public async Task<TradeDetail[]> GetTradeHistory(string pair, Sorting sort, int count = 100)
         {
-            return await OnGetTradeHistory(pair, string.Empty, null, null, sort, null, string.Empty);
+            return await OnGetTradeHistory(pair, string.Empty, null, null, sort, count, string.Empty);
         }
 
-        public async Task<TradeDetail[]> GetTradeHistory(string pair, DateTime startDate, DateTime endDate)
+        /// <summary>
+        /// Returns a list of all trades for a given market or address
+        /// </summary>
+        /// <param name="pair">Trading pair</param>
+        /// <param name="start">Start of trade range</param>
+        /// <param name="end">End of trade range</param>
+        /// <param name="count">Number to be returned (default = 100)</param>
+        /// <returns>Collection of trade detail</returns>
+        public async Task<TradeDetail[]> GetTradeHistory(string pair, DateTime startDate, DateTime endDate, int count = 100)
         {
             if(startDate > endDate)
             {
@@ -152,10 +209,19 @@ namespace Idex.Net.Data
 
             var start = _dtHelper.UTCtoUnixTime(startDate);
             var end = _dtHelper.UTCtoUnixTime(endDate);
-            return await OnGetTradeHistory(pair, string.Empty, start, end, null, null, string.Empty);
+            return await OnGetTradeHistory(pair, string.Empty, start, end, null, count, string.Empty);
         }
 
-        public async Task<TradeDetail[]> GetTradeHistory(string pair, DateTime startDate, DateTime endDate, Sorting sort)
+        /// <summary>
+        /// Returns a list of all trades for a given market or address
+        /// </summary>
+        /// <param name="pair">Trading pair</param>
+        /// <param name="start">Start of trade range</param>
+        /// <param name="end">End of trade range</param>
+        /// <param name="sort">Sorting by transaction date</param>
+        /// <param name="count">Number to be returned (default = 100)</param>
+        /// <returns>Collection of trade detail</returns>
+        public async Task<TradeDetail[]> GetTradeHistory(string pair, DateTime startDate, DateTime endDate, Sorting sort, int count = 100)
         {
             if (startDate > endDate)
             {
@@ -164,20 +230,41 @@ namespace Idex.Net.Data
 
             var start = _dtHelper.UTCtoUnixTime(startDate);
             var end = _dtHelper.UTCtoUnixTime(endDate);
-            return await OnGetTradeHistory(pair, string.Empty, start, end, sort, null, string.Empty);
+            return await OnGetTradeHistory(pair, string.Empty, start, end, sort, count, string.Empty);
         }
 
-        public async Task<TradeDetail[]> GetAddressTradeHistory(string address)
+        /// <summary>
+        /// Returns a list of all trades for a given market or address
+        /// </summary>
+        /// <param name="address">Address to query</param>
+        /// <param name="count">Number to be returned (default = 100)</param>
+        /// <returns>Collection of trade detail</returns>
+        public async Task<TradeDetail[]> GetAddressTradeHistory(string address, int count = 100)
         {
-            return await OnGetTradeHistory(string.Empty, address, null, null, null, null, string.Empty);
+            return await OnGetTradeHistory(string.Empty, address, null, null, null, count, string.Empty);
         }
 
-        public async Task<TradeDetail[]> GetAddressTradeHistory(string address, Sorting sort)
+        /// <summary>
+        /// Returns a list of all trades for a given market or address
+        /// </summary>
+        /// <param name="address">Address to query</param>
+        /// <param name="sort">Sorting by transaction date</param>
+        /// <param name="count">Number to be returned (default = 100)</param>
+        /// <returns>Collection of trade detail</returns>
+        public async Task<TradeDetail[]> GetAddressTradeHistory(string address, Sorting sort, int count = 100)
         {
-            return await OnGetTradeHistory(string.Empty, address, null, null, sort, null, string.Empty);
+            return await OnGetTradeHistory(string.Empty, address, null, null, sort, count, string.Empty);
         }
 
-        public async Task<TradeDetail[]> GetAddressTradeHistory(string address, DateTime startDate, DateTime endDate)
+        /// <summary>
+        /// Returns a list of all trades for a given market or address
+        /// </summary>
+        /// <param name="address">Address to query</param>
+        /// <param name="start">Start of trade range</param>
+        /// <param name="end">End of trade range</param>
+        /// <param name="count">Number to be returned (default = 100)</param>
+        /// <returns>Collection of trade detail</returns>
+        public async Task<TradeDetail[]> GetAddressTradeHistory(string address, DateTime startDate, DateTime endDate, int count = 100)
         {
             if (startDate > endDate)
             {
@@ -186,10 +273,19 @@ namespace Idex.Net.Data
 
             var start = _dtHelper.UTCtoUnixTime(startDate);
             var end = _dtHelper.UTCtoUnixTime(endDate);
-            return await OnGetTradeHistory(string.Empty, address, start, end, null, null, string.Empty);
+            return await OnGetTradeHistory(string.Empty, address, start, end, null, count, string.Empty);
         }
 
-        public async Task<TradeDetail[]> GetAddressTradeHistory(string address, DateTime startDate, DateTime endDate, Sorting sort)
+        /// <summary>
+        /// Returns a list of all trades for a given market or address
+        /// </summary>
+        /// <param name="address">Address to query</param>
+        /// <param name="start">Start of trade range</param>
+        /// <param name="end">End of trade range</param>
+        /// <param name="sort">Sorting by transaction date</param>
+        /// <param name="count">Number to be returned (default = 100)</param>
+        /// <returns>Collection of trade detail</returns>
+        public async Task<TradeDetail[]> GetAddressTradeHistory(string address, DateTime startDate, DateTime endDate, Sorting sort, int count = 100)
         {
             if (startDate > endDate)
             {
@@ -198,9 +294,20 @@ namespace Idex.Net.Data
 
             var start = _dtHelper.UTCtoUnixTime(startDate);
             var end = _dtHelper.UTCtoUnixTime(endDate);
-            return await OnGetTradeHistory(string.Empty, address, start, end, sort, null, string.Empty);
+            return await OnGetTradeHistory(string.Empty, address, start, end, sort, count, string.Empty);
         }
 
+        /// <summary>
+        /// Returns a paginated list of all trades for a given market or address
+        /// </summary>
+        /// <param name="pair">Trading pair</param>
+        /// <param name="address">Address to query</param>
+        /// <param name="start">Start of trade range</param>
+        /// <param name="end">End of trade range</param>
+        /// <param name="sort">Sorting by transaction date</param>
+        /// <param name="count">Number to be returned</param>
+        /// <param name="cursor">Page number to return</param>
+        /// <returns>Collection of trade detail</returns>
         private async Task<TradeDetail[]> OnGetTradeHistory(string pair, string address, long? start, long? end, Sorting? sort, int? count, string cursor)
         {
             if (string.IsNullOrEmpty(pair) && string.IsNullOrEmpty(address))
@@ -235,6 +342,10 @@ namespace Idex.Net.Data
             return response;
         }
 
+        /// <summary>
+        /// Returns an object of token data indexed by symbol
+        /// </summary>
+        /// <returns>Collection of currencies and details</returns>
         public async Task<Dictionary<string, Currency>> GetCurrencies()
         {
             string url = baseUrl + "/returnCurrencies";
@@ -244,15 +355,150 @@ namespace Idex.Net.Data
             return response;
         }
 
-        public async Task<Dictionary<string, Balance>> GetBalances(string address)
+        /// <summary>
+        /// Returns your available balances 
+        /// </summary>
+        /// <param name="address">Address to query balances of</param>
+        /// <returns>total deposited minus amount in open orders</returns>
+        public async Task<Dictionary<string, decimal>> GetBalances(string address)
         {
-            string url = baseUrl + "/returnCurrencies";
+            string url = baseUrl + "/returnBalances";
 
             var parameters = new Dictionary<string, object>();
             
             parameters.Add("address", address);
 
+            var response = await _restRepo.PostApi<Dictionary<string, decimal>, Dictionary<string, object>>(url, parameters);
+
+            return response;
+        }
+
+        /// <summary>
+        /// Returns your available balances
+        /// </summary>
+        /// <param name="address">Address to query balances of</param>
+        /// <returns>Balances and quantity in orders</returns>
+        public async Task<Dictionary<string, Balance>> GetCompleteBalances(string address)
+        {
+            string url = baseUrl + "/returnCompleteBalances";
+
+            var parameters = new Dictionary<string, object>();
+
+            parameters.Add("address", address);
+
             var response = await _restRepo.PostApi<Dictionary<string, Balance>, Dictionary<string, object>>(url, parameters);
+
+            return response;
+        }
+
+        /// <summary>
+        /// Returns deposit history
+        /// </summary>
+        /// <param name="address">Address to query history for</param>
+        /// <returns>Collection of Deposits</returns>
+        public async Task<Deposit[]> GetDeposits(string address)
+        {
+            var depositWithdrawals = await OnGetDepositsWithdrawals(address, null, null);
+
+            return depositWithdrawals.deposits;
+        }
+
+        /// <summary>
+        /// Returns deposit history
+        /// </summary>
+        /// <param name="address">Address to query history for</param>
+        /// <param name="start">Start of results</param>
+        /// <param name="end">End of results</param>
+        /// <returns>Collection of Deposits</returns>
+        public async Task<Deposit[]> GetDeposits(string address, DateTime start, DateTime end)
+        {
+            var depositWithdrawals = await OnGetDepositsWithdrawals(address, start, end);
+
+            return depositWithdrawals.deposits;
+        }
+
+        /// <summary>
+        /// Returns withdrawal history
+        /// </summary>
+        /// <param name="address">Address to query history for</param>
+        /// <returns>Collection of Withdrawals</returns>
+        public async Task<Withdrawal[]> GetWithdrawals(string address)
+        {
+            var depositWithdrawals = await OnGetDepositsWithdrawals(address, null, null);
+
+            return depositWithdrawals.withdrawals;
+        }
+
+        /// <summary>
+        /// Returns withdrawal history
+        /// </summary>
+        /// <param name="address">Address to query history for</param>
+        /// <param name="start">Start of results</param>
+        /// <param name="end">End of results</param>
+        /// <returns>Collection of Withdrawals</returns>
+        public async Task<Withdrawal[]> GetWithdrawals(string address, DateTime start, DateTime end)
+        {
+            var depositWithdrawals = await OnGetDepositsWithdrawals(address, start, end);
+
+            return depositWithdrawals.withdrawals;
+        }
+
+        /// <summary>
+        /// Returns deposit and withdrawal history
+        /// </summary>
+        /// <param name="address">Address to query history for</param>
+        /// <param name="start">Start of results</param>
+        /// <param name="end">End of results</param>
+        /// <returns>Collection of Deposits and Withdrawals</returns>
+        private async Task<DepositsWithdrawals> OnGetDepositsWithdrawals(string address, DateTime? start, DateTime? end)
+        {
+            if(start !=null && end !=null && start > end)
+            {
+                throw new Exception("Start time must be before end time!");
+            }
+
+            string url = baseUrl + "/returnDepositsWithdrawals";
+
+            var parameters = new Dictionary<string, object>();
+
+            parameters.Add("address", address);
+            if (start != null)
+                parameters.Add("start", _dtHelper.UTCtoUnixTime((DateTime)start));
+            if (end != null)
+                parameters.Add("end", _dtHelper.UTCtoUnixTime((DateTime)end));
+
+            var response = await _restRepo.PostApi<DepositsWithdrawals, Dictionary<string, object>>(url, parameters);
+
+            return response;
+        }
+
+        /// <summary>
+        /// Get all trades involving a given order hash
+        /// </summary>
+        /// <param name="orderHash">The order hash to query for associated trades</param>
+        /// <returns>Trades for a given order hash</returns>
+        public async Task<OrderTrade[]> GetOrderTrades(string orderHash)
+        {
+            string url = baseUrl + "/returnOrderTrades";
+
+            var parameters = new Dictionary<string, object>();
+
+            parameters.Add("orderHash", orderHash);
+
+            var response = await _restRepo.PostApi<OrderTrade[], Dictionary<string, object>>(url, parameters);
+
+            return response;
+        }
+
+        /// <summary>
+        /// Returns the contract address used for depositing, withdrawing, and posting orders
+        /// </summary>
+        /// <returns></returns>
+        public async Task<string> GetContractAddress()
+        {
+            string url = baseUrl + "/returnContractAddress";
+            
+            var response = await _restRepo.PostApi<string>(url);
 
             return response;
         }
