@@ -54,7 +54,7 @@ namespace Idex.Net.Data.Interface
         Task<OpenOrder[]> GetAddressOpenOrders(string address, int count = 100);
 
         /// <summary>
-        /// Returns a list of all trades for a given market or address
+        /// Returns a list of all trades for a given market
         /// </summary>
         /// <param name="pair">Trading pair</param>
         /// <param name="count">Number to be returned (default = 100)</param>
@@ -62,7 +62,7 @@ namespace Idex.Net.Data.Interface
         Task<TradeDetail[]> GetTradeHistory(string pair, int count = 100);
 
         /// <summary>
-        /// Returns a list of all trades for a given market or address
+        /// Returns a list of all trades for a given market
         /// </summary>
         /// <param name="pair">Trading pair</param>
         /// <param name="sort">Sorting by transaction date</param>
@@ -71,7 +71,7 @@ namespace Idex.Net.Data.Interface
         Task<TradeDetail[]> GetTradeHistory(string pair, Sorting sort, int count = 100);
 
         /// <summary>
-        /// Returns a list of all trades for a given market or address
+        /// Returns a list of all trades for a given market
         /// </summary>
         /// <param name="pair">Trading pair</param>
         /// <param name="start">Start of trade range</param>
@@ -81,7 +81,7 @@ namespace Idex.Net.Data.Interface
         Task<TradeDetail[]> GetTradeHistory(string pair, DateTime startDate, DateTime endDate, int count = 100);
 
         /// <summary>
-        /// Returns a list of all trades for a given market or address
+        /// Returns a list of all trades for a given market
         /// </summary>
         /// <param name="pair">Trading pair</param>
         /// <param name="start">Start of trade range</param>
@@ -92,42 +92,38 @@ namespace Idex.Net.Data.Interface
         Task<TradeDetail[]> GetTradeHistory(string pair, DateTime startDate, DateTime endDate, Sorting sort, int count = 100);
 
         /// <summary>
-        /// Returns a list of all trades for a given market or address
+        /// Returns a list of all trades for a given address. Caution: slow to execute.
         /// </summary>
         /// <param name="address">Address to query</param>
-        /// <param name="count">Number to be returned (default = 100)</param>
         /// <returns>Collection of trade detail</returns>
-        Task<TradeDetail[]> GetAddressTradeHistory(string address, int count = 100);
+        Task<Dictionary<string, TradeDetail[]>> GetAddressTradeHistory(string address);
 
         /// <summary>
-        /// Returns a list of all trades for a given market or address
+        /// Returns a list of all trades for a given address. Caution: slow to execute.
         /// </summary>
         /// <param name="address">Address to query</param>
         /// <param name="sort">Sorting by transaction date</param>
-        /// <param name="count">Number to be returned (default = 100)</param>
         /// <returns>Collection of trade detail</returns>
-        Task<TradeDetail[]> GetAddressTradeHistory(string address, Sorting sort, int count = 100);
+        Task<Dictionary<string, TradeDetail[]>> GetAddressTradeHistory(string address, Sorting sort);
 
         /// <summary>
-        /// Returns a list of all trades for a given market or address
+        /// Returns a list of all trades for a given address. Caution: slow to execute.
         /// </summary>
         /// <param name="address">Address to query</param>
         /// <param name="start">Start of trade range</param>
         /// <param name="end">End of trade range</param>
-        /// <param name="count">Number to be returned (default = 100)</param>
         /// <returns>Collection of trade detail</returns>
-        Task<TradeDetail[]> GetAddressTradeHistory(string address, DateTime startDate, DateTime endDate, int count = 100);
+        Task<Dictionary<string, TradeDetail[]>> GetAddressTradeHistory(string address, DateTime startDate, DateTime endDate);
 
         /// <summary>
-        /// Returns a list of all trades for a given market or address
+        /// Returns a list of all trades for a given address. Caution: slow to execute.
         /// </summary>
         /// <param name="address">Address to query</param>
         /// <param name="start">Start of trade range</param>
         /// <param name="end">End of trade range</param>
         /// <param name="sort">Sorting by transaction date</param>
-        /// <param name="count">Number to be returned (default = 100)</param>
         /// <returns>Collection of trade detail</returns>
-        Task<TradeDetail[]> GetAddressTradeHistory(string address, DateTime startDate, DateTime endDate, Sorting sort, int count = 100);
+        Task<Dictionary<string, TradeDetail[]>> GetAddressTradeHistory(string address, DateTime startDate, DateTime endDate, Sorting sort);
 
         /// <summary>
         /// Returns an object of token data indexed by symbol
