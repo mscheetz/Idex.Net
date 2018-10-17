@@ -6,7 +6,7 @@ namespace Idex.Net.Entities
 {
     public class Currency
     {
-        public decimal decimals { get; set; }
+        public int decimals { get; set; }
         public string address { get; set; }
         public string name { get; set; }
     }
