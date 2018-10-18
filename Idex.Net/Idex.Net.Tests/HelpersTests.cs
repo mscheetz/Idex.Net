@@ -1,4 +1,5 @@
-﻿using Idex.Net.Data;
+﻿using Idex.Net.Core;
+using Idex.Net.Data;
 using Idex.Net.Data.Interface;
 using Idex.Net.Entities;
 using System;
