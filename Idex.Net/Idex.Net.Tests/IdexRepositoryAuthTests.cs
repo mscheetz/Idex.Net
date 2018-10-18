@@ -18,18 +18,18 @@ namespace Idex.Net.Tests
         {
             IFileRepository _fileRepo = new FileRepository.FileRepository();
             Dictionary<string, string> configData = null;
-            var publicKey = string.Empty;
+            var privateKey = string.Empty;
             if (_fileRepo.FileExists(configPath))
             {
                 configData = _fileRepo.GetDataFromFile<Dictionary<string, string>>(configPath);
             }
             if (configData != null)
             {
-                publicKey = configData["privateKey"];
+                privateKey = configData["privateKey"];
             }
-            if (!string.IsNullOrEmpty(publicKey))
+            if (!string.IsNullOrEmpty(privateKey))
             {
-                _repo = new IdexRepository(publicKey);
+                _repo = new IdexRepository(privateKey);
                 _address = _repo.GetAddress();
             }
             else

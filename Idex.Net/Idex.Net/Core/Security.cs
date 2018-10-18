@@ -53,5 +53,10 @@ namespace Idex.Net.Core
             ss.AppendChar(c);
             return ss;
         }
+
+        public static string SignMessage(Dictionary<string, object> message)
+        {
+            return string.Empty;
+        }
     }
 }

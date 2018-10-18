@@ -22,6 +22,7 @@ namespace Idex.Net.Data
         private SecureString _privateKey = null;
         private Dictionary<string, Currency> currencyList;
         private string _address = string.Empty;
+        private string _contractAddress = string.Empty;
 
         public IdexRepository()
         {
@@ -40,11 +41,17 @@ namespace Idex.Net.Data
             _restRepo = new RESTRepository();
             baseUrl = "https://api.idex.market";
             _dtHelper = new DateTimeHelper();
-            currencyList = this.GetCurrencies().Result;
             if(_privateKey != null)
             {
                 _address = EthECKey.GetPublicAddress(Security.ToUnsecureString(_privateKey));
+                LazyLoadElements();
             }
+        }
+
+        private async void LazyLoadElements()
+        {
+            currencyList = await this.GetCurrencies();
+            _contractAddress = await GetContractAddress();
         }
 
         #region Public Endpoints
@@ -758,15 +765,17 @@ namespace Idex.Net.Data
             BigInteger sellAmount = type == TradeType.buy ? new BigInteger((price * quantity)) : new BigInteger(quantity);
 
             var parameters = new Dictionary<string, object>();
-
+            parameters.Add("contractAddress", _contractAddress);
             parameters.Add("tokenBuy", currencyList[buySymbol].address);
             parameters.Add("amountBuy", buyAmount);
             parameters.Add("tokenSell", currencyList[sellSymbol].address);
             parameters.Add("amountSell", sellAmount);
-            parameters.Add("address", _address);
             parameters.Add("nonce", new BigInteger(_dtHelper.UTCtoUnixTime()));
+            parameters.Add("address", _address);
 
             //SignMessage
+            var signature = new Nethereum.Signer.TransactionSigner();
+            
 
             parameters.Add("v",0);
             parameters.Add("r", string.Empty);
