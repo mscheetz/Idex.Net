@@ -1,10 +1,14 @@
 ﻿using DateTimeHelpers;
+using Idex.Net.Core;
 using Idex.Net.Data.Interface;
 using Idex.Net.Entities;
+using Nethereum.Signer;
 //using RESTApiAccess;
 //using RESTApiAccess.Interface;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,8 +19,9 @@ namespace Idex.Net.Data
         private string baseUrl;
         private IRESTRepository _restRepo;
         private DateTimeHelper _dtHelper;
-        private string privateKey;
+        private SecureString _privateKey = null;
         private Dictionary<string, Currency> currencyList;
+        private string _address = string.Empty;
 
         public IdexRepository()
         {
@@ -25,7 +30,8 @@ namespace Idex.Net.Data
 
         public IdexRepository(string privateKey)
         {
-            this.privateKey = privateKey;
+            this._privateKey = Security.ToSecureString(privateKey);
+
             LoadRepository();
         }
 
@@ -35,6 +41,10 @@ namespace Idex.Net.Data
             baseUrl = "https://api.idex.market";
             _dtHelper = new DateTimeHelper();
             currencyList = this.GetCurrencies().Result;
+            if(_privateKey != null)
+            {
+                _address = EthECKey.GetPublicAddress(Security.ToUnsecureString(_privateKey));
+            }
         }
 
         #region Public Endpoints
@@ -530,19 +540,231 @@ namespace Idex.Net.Data
 
         #region Authenticated Endpoints
 
+        /// <summary>
+        /// Get public address for loaded primary key
+        /// </summary>
+        /// <returns>String of public address</returns>
+        public string GetAddress()
+        {
+            if (string.IsNullOrEmpty(_address))
+                throw new Exception("Load Idex.Net with wallet Primary Key to use this endpoint.");
+
+            return _address;
+        }
+
+        /// <summary>
+        /// Returns a list of all open orders
+        /// </summary>
+        /// <param name="address">Address to query</param>
+        /// <param name="count">Number to be returned (default = 100)</param>
+        /// <returns>Collection of open orders</returns>
+        public async Task<OpenOrder[]> GetAddressOpenOrders(int count = 100)
+        {
+            if (string.IsNullOrEmpty(_address))
+                throw new Exception("Load Idex.Net with wallet Primary Key to use this endpoint.");
+
+            return await OnGetOpenOrders(string.Empty, _address, count, string.Empty);
+        }
+
+        /// <summary>
+        /// Returns a list of all trades for a given market or address
+        /// </summary>
+        /// <param name="address">Address to query</param>
+        /// <returns>Collection of trade detail</returns>
+        public async Task<Dictionary<string, TradeDetail[]>> GetAddressTradeHistory()
+        {
+            if (string.IsNullOrEmpty(_address))
+                throw new Exception("Load Idex.Net with wallet Primary Key to use this endpoint.");
+
+            return await OnGetAddressTradeHistory(_address, null, null, null, string.Empty);
+        }
+
+        /// <summary>
+        /// Returns a list of all trades for a given market or address
+        /// </summary>
+        /// <param name="address">Address to query</param>
+        /// <param name="sort">Sorting by transaction date</param>
+        /// <returns>Collection of trade detail</returns>
+        public async Task<Dictionary<string, TradeDetail[]>> GetAddressTradeHistory(Sorting sort)
+        {
+            if (string.IsNullOrEmpty(_address))
+                throw new Exception("Load Idex.Net with wallet Primary Key to use this endpoint.");
+
+            return await OnGetAddressTradeHistory(_address, null, null, sort, string.Empty);
+        }
+
+        /// <summary>
+        /// Returns a list of all trades for a given market or address
+        /// </summary>
+        /// <param name="address">Address to query</param>
+        /// <param name="start">Start of trade range</param>
+        /// <param name="end">End of trade range</param>
+        /// <returns>Collection of trade detail</returns>
+        public async Task<Dictionary<string, TradeDetail[]>> GetAddressTradeHistory(DateTime startDate, DateTime endDate)
+        {
+            if (string.IsNullOrEmpty(_address))
+                throw new Exception("Load Idex.Net with wallet Primary Key to use this endpoint.");
+
+            if (startDate > endDate)
+                throw new Exception("Start Date cannot be after End Date");
+
+            var start = _dtHelper.UTCtoUnixTime(startDate);
+            var end = _dtHelper.UTCtoUnixTime(endDate);
+            return await OnGetAddressTradeHistory(_address, start, end, null, string.Empty);
+        }
+
+        /// <summary>
+        /// Returns a list of all trades for a given market or address
+        /// </summary>
+        /// <param name="address">Address to query</param>
+        /// <param name="start">Start of trade range</param>
+        /// <param name="end">End of trade range</param>
+        /// <param name="sort">Sorting by transaction date</param>
+        /// <returns>Collection of trade detail</returns>
+        public async Task<Dictionary<string, TradeDetail[]>> GetAddressTradeHistory(DateTime startDate, DateTime endDate, Sorting sort)
+        {
+            if (string.IsNullOrEmpty(_address))
+                throw new Exception("Load Idex.Net with wallet Primary Key to use this endpoint.");
+
+            if (startDate > endDate)
+                throw new Exception("Start Date cannot be after End Date");
+
+            var start = _dtHelper.UTCtoUnixTime(startDate);
+            var end = _dtHelper.UTCtoUnixTime(endDate);
+            return await OnGetAddressTradeHistory(_address, start, end, sort, string.Empty);
+        }
+
+        /// <summary>
+        /// Returns your available balances 
+        /// </summary>
+        /// <param name="address">Address to query balances of</param>
+        /// <returns>total deposited minus amount in open orders</returns>
+        public async Task<Dictionary<string, decimal>> GetBalances()
+        {
+            if (string.IsNullOrEmpty(_address))
+                throw new Exception("Load Idex.Net with wallet Primary Key to use this endpoint.");
+
+            string url = baseUrl + "/returnBalances";
+
+            var parameters = new Dictionary<string, object>();
+
+            parameters.Add("address", _address);
+
+            var response = await _restRepo.PostApi<Dictionary<string, decimal>, Dictionary<string, object>>(url, parameters);
+
+            return response;
+        }
+
+        /// <summary>
+        /// Returns your available balances
+        /// </summary>
+        /// <param name="address">Address to query balances of</param>
+        /// <returns>Balances and quantity in orders</returns>
+        public async Task<Dictionary<string, Balance>> GetCompleteBalances()
+        {
+            if (string.IsNullOrEmpty(_address))
+                throw new Exception("Load Idex.Net with wallet Primary Key to use this endpoint.");
+
+            string url = baseUrl + "/returnCompleteBalances";
+
+            var parameters = new Dictionary<string, object>();
+
+            parameters.Add("address", _address);
+
+            var response = await _restRepo.PostApi<Dictionary<string, Balance>, Dictionary<string, object>>(url, parameters);
+
+            return response;
+        }
+
+        /// <summary>
+        /// Returns deposit history
+        /// </summary>
+        /// <param name="address">Address to query history for</param>
+        /// <returns>Collection of Deposits</returns>
+        public async Task<Deposit[]> GetDeposits()
+        {
+            if (string.IsNullOrEmpty(_address))
+                throw new Exception("Load Idex.Net with wallet Primary Key to use this endpoint.");
+
+            var depositWithdrawals = await OnGetDepositsWithdrawals(_address, null, null);
+
+            return depositWithdrawals.deposits;
+        }
+
+        /// <summary>
+        /// Returns deposit history
+        /// </summary>
+        /// <param name="address">Address to query history for</param>
+        /// <param name="start">Start of results</param>
+        /// <param name="end">End of results</param>
+        /// <returns>Collection of Deposits</returns>
+        public async Task<Deposit[]> GetDeposits(DateTime start, DateTime end)
+        {
+            if (string.IsNullOrEmpty(_address))
+                throw new Exception("Load Idex.Net with wallet Primary Key to use this endpoint.");
+
+            var depositWithdrawals = await OnGetDepositsWithdrawals(_address, start, end);
+
+            return depositWithdrawals.deposits;
+        }
+
+        /// <summary>
+        /// Returns withdrawal history
+        /// </summary>
+        /// <param name="address">Address to query history for</param>
+        /// <returns>Collection of Withdrawals</returns>
+        public async Task<Withdrawal[]> GetWithdrawals()
+        {
+            if (string.IsNullOrEmpty(_address))
+                throw new Exception("Load Idex.Net with wallet Primary Key to use this endpoint.");
+
+            var depositWithdrawals = await OnGetDepositsWithdrawals(_address, null, null);
+
+            return depositWithdrawals.withdrawals;
+        }
+
+        /// <summary>
+        /// Returns withdrawal history
+        /// </summary>
+        /// <param name="address">Address to query history for</param>
+        /// <param name="start">Start of results</param>
+        /// <param name="end">End of results</param>
+        /// <returns>Collection of Withdrawals</returns>
+        public async Task<Withdrawal[]> GetWithdrawals(DateTime start, DateTime end)
+        {
+            if (string.IsNullOrEmpty(_address))
+                throw new Exception("Load Idex.Net with wallet Primary Key to use this endpoint.");
+
+            var depositWithdrawals = await OnGetDepositsWithdrawals(_address, start, end);
+
+            return depositWithdrawals.withdrawals;
+        }
+
+        /// <summary>
+        /// Place an order on the exchange
+        /// </summary>
+        /// <param name="pair">Trading pair</param>
+        /// <param name="price">Price of trade</param>
+        /// <param name="quantity">Quantity to trade</param>
+        /// <param name="type">Trade side ( buy | sell )</param>
+        /// <returns></returns>
         public async Task<OrderResponse> PlaceOrder(string pair, decimal price, decimal quantity, TradeType type)
         {
             string url = baseUrl + "/returnCurrencies";
 
+            var buySymbol = Helpers.BuySymbol(pair, type);
+            var sellSymbol = Helpers.SellSymbol(pair, type);
+            BigInteger buyAmount = type == TradeType.buy ? new BigInteger(quantity) : new BigInteger((price * quantity));
+            BigInteger sellAmount = type == TradeType.buy ? new BigInteger((price * quantity)) : new BigInteger(quantity);
+
             var parameters = new Dictionary<string, object>();
 
-            parameters.Add("tokenBuy", string.Empty);
-            parameters.Add("amountBuy", 0.0M);
-            parameters.Add("tokenSell", string.Empty);
-            parameters.Add("amountSell", 0.0M);
-            parameters.Add("address", string.Empty);
-            parameters.Add("nonce", 0);
-            parameters.Add("expires", 0);
+            parameters.Add("tokenBuy", currencyList[buySymbol].address);
+            parameters.Add("amountBuy", buyAmount);
+            parameters.Add("tokenSell", currencyList[sellSymbol].address);
+            parameters.Add("amountSell", sellAmount);
+            parameters.Add("address", _address);
+            parameters.Add("nonce", new BigInteger(_dtHelper.UTCtoUnixTime()));
 
             //SignMessage
 

@@ -8,7 +8,7 @@ namespace Idex.Net.Data.Interface
 {
     public interface IIdexRepository
     {
-
+        #region Public Endpoints
         /// <summary>
         /// Get ticker for a trading pair
         /// </summary>
@@ -189,5 +189,95 @@ namespace Idex.Net.Data.Interface
         /// </summary>
         /// <returns></returns>
         Task<string> GetContractAddress();
+
+        #endregion Public Endpoints
+
+        #region Authenticated Endpoints
+
+        /// <summary>
+        /// Get public address for loaded primary key
+        /// </summary>
+        /// <returns>String of public address</returns>
+        string GetAddress();
+
+        /// <summary>
+        /// Returns a list of all open orders
+        /// </summary>
+        /// <param name="count">Number to be returned (default = 100)</param>
+        /// <returns>Collection of open orders</returns>
+        Task<OpenOrder[]> GetAddressOpenOrders(int count = 100);
+
+        /// <summary>
+        /// Returns a list of all trades for a given market or address
+        /// </summary>
+        /// <returns>Collection of trade detail</returns>
+        Task<Dictionary<string, TradeDetail[]>> GetAddressTradeHistory();
+
+        /// <summary>
+        /// Returns a list of all trades for a given market or address
+        /// </summary>
+        /// <param name="sort">Sorting by transaction date</param>
+        /// <returns>Collection of trade detail</returns>
+        Task<Dictionary<string, TradeDetail[]>> GetAddressTradeHistory(Sorting sort);
+
+        /// <summary>
+        /// Returns a list of all trades for a given market or address
+        /// </summary>
+        /// <param name="start">Start of trade range</param>
+        /// <param name="end">End of trade range</param>
+        /// <returns>Collection of trade detail</returns>
+        Task<Dictionary<string, TradeDetail[]>> GetAddressTradeHistory(DateTime startDate, DateTime endDate);
+
+        /// <summary>
+        /// Returns a list of all trades for a given market or address
+        /// </summary>
+        /// <param name="start">Start of trade range</param>
+        /// <param name="end">End of trade range</param>
+        /// <param name="sort">Sorting by transaction date</param>
+        /// <returns>Collection of trade detail</returns>
+        Task<Dictionary<string, TradeDetail[]>> GetAddressTradeHistory(DateTime startDate, DateTime endDate, Sorting sort);
+
+        /// <summary>
+        /// Returns your available balances 
+        /// </summary>
+        /// <returns>total deposited minus amount in open orders</returns>
+        Task<Dictionary<string, decimal>> GetBalances();
+
+        /// <summary>
+        /// Returns your available balances
+        /// </summary>
+        /// <returns>Balances and quantity in orders</returns>
+        Task<Dictionary<string, Balance>> GetCompleteBalances();
+
+        /// <summary>
+        /// Returns deposit history
+        /// </summary>
+        /// <returns>Collection of Deposits</returns>
+        Task<Deposit[]> GetDeposits();
+
+        /// <summary>
+        /// Returns deposit history
+        /// </summary>
+        /// <param name="start">Start of results</param>
+        /// <param name="end">End of results</param>
+        /// <returns>Collection of Deposits</returns>
+        Task<Deposit[]> GetDeposits(DateTime start, DateTime end);
+
+        /// <summary>
+        /// Returns withdrawal history
+        /// </summary>
+        /// <returns>Collection of Withdrawals</returns>
+        Task<Withdrawal[]> GetWithdrawals();
+
+        /// <summary>
+        /// Returns withdrawal history
+        /// </summary>
+        /// <param name="start">Start of results</param>
+        /// <param name="end">End of results</param>
+        /// <returns>Collection of Withdrawals</returns>
+        Task<Withdrawal[]> GetWithdrawals(DateTime start, DateTime end);
+
+        #endregion Authenticated Endpoints
+
     }
 }
