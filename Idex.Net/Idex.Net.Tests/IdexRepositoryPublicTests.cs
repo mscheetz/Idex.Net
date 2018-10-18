@@ -1,18 +1,31 @@
+using FileRepository;
 using Idex.Net.Data;
 using Idex.Net.Data.Interface;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Idex.Net.Tests
 {
-    public class IdexRepositoryTests : IDisposable
+    public class IdexRepositoryPublicTests : IDisposable
     {
         private IIdexRepository _repo;
         private string _address = "";
         private string _hash = "";
+        private string configPath = "config.json";
 
-        public IdexRepositoryTests()
+        public IdexRepositoryPublicTests()
         {
+            IFileRepository _fileRepo = new FileRepository.FileRepository();
+            Dictionary<string, string> configData = null;
+            if (_fileRepo.FileExists(configPath))
+            {
+                configData = _fileRepo.GetDataFromFile<Dictionary<string, string>>(configPath);
+            }
+            if (configData != null)
+            {
+                _address = configData["publicKey"];
+            }
             _repo = new IdexRepository();
         }
 
