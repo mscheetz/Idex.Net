@@ -1,6 +1,7 @@
 ﻿using Idex.Net.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Idex.Net.Core
@@ -72,6 +73,23 @@ namespace Idex.Net.Core
                 return pair.Substring(0, pair.IndexOf("_"));
             else
                 return pair.Substring(pair.IndexOf("_") + 1);
+        }
+
+        /// <summary>
+        /// Convert dictionary to querystring
+        /// </summary>
+        /// <param name="parameters">Dictionary to convert</param>
+        /// <returns>String of values</returns>
+        public static string StringifyDictionary(Dictionary<string, object> parameters)
+        {
+            var qsValues = string.Empty;
+
+            if (parameters != null)
+            {
+                qsValues = string.Join("&", parameters.Select(p => p.Key + "=" + p.Value));
+            }
+
+            return qsValues;
         }
     }
 }

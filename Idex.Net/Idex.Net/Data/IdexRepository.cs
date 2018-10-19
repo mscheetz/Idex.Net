@@ -748,6 +748,21 @@ namespace Idex.Net.Data
         }
 
         /// <summary>
+        /// Place an order on the exchage
+        /// </summary>
+        /// <param name="pair">Pair to trade</param>
+        /// <param name="price">Price of order</param>
+        /// <param name="quantity">Quantity of order</param>
+        /// <param name="type">Trade side ( buy | sell )</param>
+        /// <returns></returns>
+        public async Task<TradeResponse> PlaceOrder(string pair, decimal price, decimal quantity, TradeType type)
+        {
+            var order = await OnOrder(pair, price, quantity, type);
+
+            return await OnTrade(order.orderHash, order.amount);
+        }
+
+        /// <summary>
         /// Place an order on the exchange
         /// </summary>
         /// <param name="pair">Trading pair</param>
@@ -755,9 +770,9 @@ namespace Idex.Net.Data
         /// <param name="quantity">Quantity to trade</param>
         /// <param name="type">Trade side ( buy | sell )</param>
         /// <returns></returns>
-        public async Task<OrderResponse> PlaceOrder(string pair, decimal price, decimal quantity, TradeType type)
+        private async Task<OrderResponse> OnOrder(string pair, decimal price, decimal quantity, TradeType type)
         {
-            string url = baseUrl + "/returnCurrencies";
+            string url = baseUrl + "/order";
 
             var buySymbol = Helpers.BuySymbol(pair, type);
             var sellSymbol = Helpers.SellSymbol(pair, type);
@@ -781,10 +796,102 @@ namespace Idex.Net.Data
             parameters.Add("r", string.Empty);
             parameters.Add("s", string.Empty);
 
-
             var response = await _restRepo.PostApi<OrderResponse, Dictionary<string, object>>(url, parameters);
 
             return response;
+        }
+
+        /// <summary>
+        /// Trade an order
+        /// </summary>
+        /// <param name="orderHash">Order hash to trade</param>
+        /// <param name="amount">Amount received from order</param>
+        /// <returns>Trade reponse object</returns>
+        private async Task<TradeResponse> OnTrade(string orderHash, decimal amount)
+        {
+            string url = baseUrl + "/trade";
+
+            BigInteger tradeAmount = new BigInteger(amount);
+
+            var parameters = new Dictionary<string, object>();
+            parameters.Add("orderHash", orderHash);
+            parameters.Add("amount", tradeAmount);
+            parameters.Add("address", _address);
+            parameters.Add("nonce", new BigInteger(_dtHelper.UTCtoUnixTime()));
+
+            //SignMessage
+            var signature = new Nethereum.Signer.TransactionSigner();
+
+            parameters.Add("v", 0);
+            parameters.Add("r", string.Empty);
+            parameters.Add("s", string.Empty);
+
+            var response = await _restRepo.PostApi<TradeResponse, Dictionary<string, object>>(url, parameters);
+
+            return response;
+        }
+
+        /// <summary>
+        /// Cancel an open order
+        /// </summary>
+        /// <param name="orderHash">Order hash</param>
+        /// <returns>Message of the cancel attempt</returns>
+        public async Task<Dictionary<string, object>> CancelOrder(string orderHash)
+        {
+            string url = baseUrl + "/cancel";
+
+            var parameters = new Dictionary<string, object>();
+            parameters.Add("orderHash", orderHash);
+            parameters.Add("nonce", new BigInteger(_dtHelper.UTCtoUnixTime()));
+
+            //SignMessage
+            var signature = new Nethereum.Signer.TransactionSigner();
+
+            parameters.Add("address", _address);
+            parameters.Add("v", 0);
+            parameters.Add("r", string.Empty);
+            parameters.Add("s", string.Empty);
+
+            var response = await _restRepo.PostApi<Dictionary<string, object>, Dictionary<string, object>>(url, parameters);
+
+            return response;
+        }
+
+        /// <summary>
+        /// Withdraw funds from exchange
+        /// </summary>
+        /// <param name="symbol">Symbol of token to withdraw</param>
+        /// <param name="amount">Amount to withdraw</param>
+        /// <returns>Boolean of withdraw attempt</returns>
+        public async Task<bool> Withdraw(string symbol, decimal amount)
+        {
+            string url = baseUrl + "/withdraw";
+            BigInteger withdrawAmount = new BigInteger(amount);
+
+            var parameters = new Dictionary<string, object>();
+            parameters.Add("contractAddress", _contractAddress);
+            parameters.Add("token", currencyList[symbol].address);
+            parameters.Add("amount", withdrawAmount);
+            parameters.Add("address", _address);
+            parameters.Add("nonce", new BigInteger(_dtHelper.UTCtoUnixTime()));
+
+            //SignMessage
+            var signature = new Nethereum.Signer.TransactionSigner();
+
+            parameters.Add("v", 0);
+            parameters.Add("r", string.Empty);
+            parameters.Add("s", string.Empty);
+
+            try
+            {
+                var response = await _restRepo.PostApi<Dictionary<string, object>, Dictionary<string, object>>(url, parameters);
+
+                return true;
+            }
+            catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         #endregion Authenticated Endpoints

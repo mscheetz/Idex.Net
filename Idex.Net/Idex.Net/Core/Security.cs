@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Nethereum.Hex.HexConvertors.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -56,6 +57,12 @@ namespace Idex.Net.Core
 
         public static string SignMessage(Dictionary<string, object> message)
         {
+            var web3 = new Nethereum.Web3.Web3();
+            var stringed = Helpers.StringifyDictionary(message);
+            var hashed = Nethereum.Web3.Web3.Sha3(stringed);
+            var salted = new Nethereum.Util.Sha3Keccack().CalculateHash(hashed).HexToByteArray();
+
+            
             return string.Empty;
         }
     }
